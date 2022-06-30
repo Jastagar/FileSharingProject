@@ -23,6 +23,17 @@ app.get("/",(req,res)=>{
 
 app.route("/file/:id").get(handleDownload).post(handleDownload)
 
+
+async function registerSW(){
+    if('serviceWorker' in navigator){
+        try{
+            await navigator.serviceWorker.register('./sw.js')
+        }catch(e){
+            console.log("ERRRRORRRRRRRRR"+e)
+        }
+}
+}
+
 app.post("/upload", upload.single("file"),async (req,res)=>{
     const filename = {
         path: req.file.path,
@@ -31,6 +42,8 @@ app.post("/upload", upload.single("file"),async (req,res)=>{
     if(req.body.password !=null && req.body.password !==""){
         filename.password=await bcrypt.hash(req.body.password, 10)
     }
+
+    registerSW()
 
     const file = await File.create(filename)
     console.log(file)
@@ -55,5 +68,8 @@ async function handleDownload(req,res){
     await file.save()
     res.download(file.path, file.originalName)
 }
+
+
+
 
 app.listen(process.env.PORT)
