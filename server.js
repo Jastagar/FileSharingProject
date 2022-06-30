@@ -11,6 +11,9 @@ const mongoose = require("mongoose")
 const bcrypt = require("bcrypt")
 
 mongoose.connect(process.env.DATABASE_URLMDB)
+
+app.use(express.static("public"))
+
 app.set("view engine","ejs")
 app.use(express.urlencoded({extended:true}))
 
