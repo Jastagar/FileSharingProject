@@ -22,17 +22,18 @@ app.get("/",(req,res)=>{
 })
 
 app.route("/file/:id").get(handleDownload).post(handleDownload)
+app.route("/fileGet/forceGetAll").get(async (req,res)=>{
+    const files = await File.find({})
+    const paths = files.map(e => {
+        return e.path
+    })
+    res.render("image",{image: paths})
+})
+app.route("/fileGet/:id").get(async (req,res)=>{
+    const file = await File.findById(req.params.id)
+    res.render("image",{image: file.path})
+})
 
-
-async function registerSW(){
-    if('serviceWorker' in navigator){
-        try{
-            await navigator.serviceWorker.register('./sw.js')
-        }catch(e){
-            console.log("ERRRRORRRRRRRRR"+e)
-        }
-}
-}
 
 app.post("/upload", upload.single("file"),async (req,res)=>{
     const filename = {
@@ -43,11 +44,14 @@ app.post("/upload", upload.single("file"),async (req,res)=>{
         filename.password=await bcrypt.hash(req.body.password, 10)
     }
 
-    registerSW()
-
     const file = await File.create(filename)
     console.log(file)
     res.render("index",{fileLink:`${req.headers.origin}/file/${file.id}`})
+})
+
+app.get('/newFile',async (req,res)=>{
+    const data = await File.findById('632ec2228e61d460c74ab8b3')
+    res.json(data)
 })
 
 async function handleDownload(req,res){
@@ -72,4 +76,6 @@ async function handleDownload(req,res){
 
 
 
-app.listen(process.env.PORT)
+app.listen(process.env.PORT,()=>{
+    console.log('Listening At:',process.env.PORT)
+})
